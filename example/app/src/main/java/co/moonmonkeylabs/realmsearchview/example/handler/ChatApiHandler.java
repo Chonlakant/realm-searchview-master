@@ -11,6 +11,8 @@ import java.util.HashMap;
 import co.moonmonkeylabs.realmsearchview.example.event.ContentInfoEvent;
 import co.moonmonkeylabs.realmsearchview.example.event.ContentInfoSuccess;
 import co.moonmonkeylabs.realmsearchview.example.model.media.ChatHistory;
+import co.moonmonkeylabs.realmsearchview.example.model.media.ChatHistoryNew;
+import co.moonmonkeylabs.realmsearchview.example.model.media.TheMessageObject;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -41,18 +43,15 @@ public class ChatApiHandler {
 
         api.getChatHistory(new Callback<ChatHistory>() {
             @Override
-            public void success(ChatHistory content, Response response) {
-                if (content != null) {
-                    Log.e("bbbbb",content.getContent().size()+"");
-                    ApiBus.getInstance().postQueue(new ContentInfoSuccess(content));
-
+            public void success(ChatHistory theMessageObject, Response response) {
+                if (theMessageObject != null) {
+                    ApiBus.getInstance().postQueue(new ContentInfoSuccess(theMessageObject));
                 }
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Log.e("COnten", error.getUrl());
-                Log.e("COnten", error.getLocalizedMessage());
+            Log.e("",error.getMessage());
             }
         });
     }

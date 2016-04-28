@@ -1,10 +1,7 @@
 package co.moonmonkeylabs.realmsearchview.example;
 
 import android.content.Context;
-import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +29,7 @@ import co.moonmonkeylabs.realmsearchview.example.event.ContentInfoSuccess;
 import co.moonmonkeylabs.realmsearchview.example.handler.ActivityResultBus;
 import co.moonmonkeylabs.realmsearchview.example.handler.ApiBus;
 import co.moonmonkeylabs.realmsearchview.example.model.Blog;
+import co.moonmonkeylabs.realmsearchview.example.model.media.ChatHistory;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
@@ -40,20 +38,23 @@ public class MainActivity extends AppCompatActivity {
     private RealmSearchView realmSearchView;
     private BlogRecyclerViewAdapter adapter;
     private Realm realm;
-    List<Blog> box = new ArrayList<>();
+    ArrayList<ChatHistory> chatHistories = new ArrayList<>();
+    ArrayList<Blog> blogs = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
-        ApiBus.getInstance().post(new ContentInfoEvent());
+        ApiBus.getInstance().postQueue(new ContentInfoEvent());
         resetRealm();
         //loadBlogData();
 
         realmSearchView = (RealmSearchView) findViewById(R.id.search_view);
 
-        realm = Realm.getInstance(this);
-        adapter = new BlogRecyclerViewAdapter(this, realm, "title");
-        realmSearchView.setAdapter(adapter);
+
+//        adapter = new BlogRecyclerViewAdapter(this, realm, "title");
+//        realmSearchView.setAdapter(adapter);
+
     }
 
     @Override
@@ -61,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         ActivityResultBus.getInstance().register(this);
         ApiBus.getInstance().register(this);
-    }
 
+    }
 
     @Override
     protected void onPause() {
@@ -70,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
         ActivityResultBus.getInstance().unregister(this);
         ApiBus.getInstance().unregister(this);
     }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -86,12 +89,17 @@ public class MainActivity extends AppCompatActivity {
         JsonFactory jsonFactory = new JsonFactory();
         Random random = new Random();
         try {
-            JsonParser jsonParserBlog = jsonFactory.createParser(getResources().openRawResource(R.raw.blog));
-            List<Blog> entries = objectMapper.readValue(jsonParserBlog, new TypeReference<List<Blog>>() {});
-            Log.e("cccc",entries.toString());
+            JsonParser jsonParserBlog =
+                    jsonFactory.createParser(getResources().openRawResource(R.raw.blog));
+            List<Blog> entries =
+                    objectMapper.readValue(jsonParserBlog, new TypeReference<List<Blog>>() {
+                    });
+
             JsonParser jsonParserEmoji =
                     jsonFactory.createParser(getResources().openRawResource(R.raw.emoji));
-            List<String> emojies = objectMapper.readValue(jsonParserEmoji, new TypeReference<List<String>>() {});
+            List<String> emojies =
+                    objectMapper.readValue(jsonParserEmoji, new TypeReference<List<String>>() {
+                    });
 
             int numEmoji = emojies.size();
             for (Blog blog : entries) {
@@ -121,7 +129,40 @@ public class MainActivity extends AppCompatActivity {
         Realm.deleteRealm(realmConfig);
     }
 
-    public class BlogRecyclerViewAdapter extends RealmSearchAdapter<Blog, BlogRecyclerViewAdapter.ViewHolder> {
+    @Subscribe
+    public void getEvent(ContentInfoSuccess event) {
+        if (event != null) {
+            chatHistories.add(event.response);
+
+            for (int j = 0; j < event.response.getContent().size(); j++) {
+                Blog i = new Blog();
+                i.setDate("");
+                i.setTitle(event.response.getContent().get(j).getMessage());
+                i.setContent(event.response.getContent().get(j).getMessage());
+                blogs.add(i);
+                for (Blog blog : blogs) {
+                    Log.e("getContent", blog.getContent());
+                    blog.setTitle(blog.getTitle());
+                    blog.setContent(blog.getTitle());
+                }
+            }
+
+
+            Realm realm = Realm.getInstance(this);
+            realm.beginTransaction();
+            realm.copyToRealm(blogs);
+            realm.commitTransaction();
+            realm.close();
+
+            realm = Realm.getInstance(this);
+            adapter = new BlogRecyclerViewAdapter(this, realm, "title");
+            realmSearchView.setAdapter(adapter);
+
+        }
+    }
+
+    public class BlogRecyclerViewAdapter
+            extends RealmSearchAdapter<Blog, BlogRecyclerViewAdapter.ViewHolder> {
 
         public BlogRecyclerViewAdapter(
                 Context context,
@@ -175,29 +216,5 @@ public class MainActivity extends AppCompatActivity {
                     }
             );
         }
-    }
-
-    @Subscribe
-    public void getListPhoto(ContentInfoSuccess event) {
-        if (event != null) {
-            Log.e("qqqq", event.response.getContent().size() + "");
-            for(int i =0 ; i <event.response.getContent().size();i++){
-                Blog ok = new Blog();
-                ok.setTitle(event.response.getContent().get(i).getMessage());
-                ok.setContent(event.response.getContent().get(i).getMessage());
-                ok.setDate("111");
-                box.add(ok);
-                Realm realm = Realm.getInstance(this);
-                realm.beginTransaction();
-                realm.copyToRealm(box);
-                realm.commitTransaction();
-                realm.close();
-            }
-
-
-
-
-        }
-
     }
 }

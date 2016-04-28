@@ -1,6 +1,7 @@
 package co.moonmonkeylabs.realmsearchview.example.model;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
 
 /**
  * Blog model.

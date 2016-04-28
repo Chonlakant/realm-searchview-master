@@ -4,6 +4,8 @@ package co.moonmonkeylabs.realmsearchview.example.handler;
 import java.util.HashMap;
 
 import co.moonmonkeylabs.realmsearchview.example.model.media.ChatHistory;
+import co.moonmonkeylabs.realmsearchview.example.model.media.ChatHistoryNew;
+import co.moonmonkeylabs.realmsearchview.example.model.media.TheMessageObject;
 import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Path;

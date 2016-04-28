@@ -36,9 +36,9 @@ public class BlogItemView extends RelativeLayout {
     }
 
     public void bind(Blog blog) {
-        emoji.setText(blog.getEmoji());
+//        emoji.setText(blog.getEmoji());
         title.setText(blog.getTitle());
-        date.setText(blog.getDate());
+//        date.setText(blog.getDate());
         description.setText(blog.getContent());
     }
 }

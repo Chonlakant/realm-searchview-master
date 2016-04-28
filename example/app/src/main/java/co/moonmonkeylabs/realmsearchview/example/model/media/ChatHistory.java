@@ -3,6 +3,7 @@ package co.moonmonkeylabs.realmsearchview.example.model.media;
 import java.util.List;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
 
 /**
  * Created by root1 on 2/1/16.
@@ -19,6 +20,7 @@ public class ChatHistory {
      * finalPage : false
      */
 
+    @Ignore
     private PageEntity page;
     /**
      * id : 2935
@@ -35,7 +37,9 @@ public class ChatHistory {
      * dataString :
      */
 
+    @Ignore
     private List<ContentEntity> content;
+
 
     public void setPage(PageEntity page) {
         this.page = page;
@@ -109,6 +113,7 @@ public class ChatHistory {
             return finalPage;
         }
     }
+
 
     public static class ContentEntity {
         private int id;
